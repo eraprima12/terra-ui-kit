@@ -1,8 +1,8 @@
 # 🌌 Terra UI Kit
 
-[![NPM Version](https://img.shields.io/npm/v/terra-ui-kit?color=4182FF&style=flat-square)](https://www.npmjs.com/package/terra-ui-kit)
-[![License](https://img.shields.io/npm/l/terra-ui-kit?color=34D399&style=flat-square)](https://github.com/eraprima12/terra-ui-kit)
-[![Bundle Size](https://img.shields.io/bundlephobia/minzip/terra-ui-kit?color=FBBF24&style=flat-square)](https://bundlephobia.com/package/terra-ui-kit)
+[![NPM Version](https://img.shields.io/npm/v/@eraprimax/terra-ui-kit?color=4182FF&style=flat-square)](https://www.npmjs.com/package/@eraprimax/terra-ui-kit)
+[![License](https://img.shields.io/npm/l/@eraprimax/terra-ui-kit?color=34D399&style=flat-square)](https://github.com/eraprima12/terra-ui-kit)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/@eraprimax/terra-ui-kit?color=FBBF24&style=flat-square)](https://bundlephobia.com/package/@eraprimax/terra-ui-kit)
 
 An ultra-modern, glassmorphic UI component suite built for **Vue 3** and **Tailwind CSS**. Designed for developers looking to craft stunning, cyberpunk-inspired, and futuristic web applications with tactile depth, vibrant color orbs, and rich glassmorphism physics.
 
@@ -24,13 +24,13 @@ Install **Terra UI Kit** using your preferred package manager:
 
 ```bash
 # Using npm
-npm install terra-ui-kit
+npm install @eraprimax/terra-ui-kit
 
 # Using yarn
-yarn add terra-ui-kit
+yarn add @eraprimax/terra-ui-kit
 
 # Using pnpm
-pnpm add terra-ui-kit
+pnpm add @eraprimax/terra-ui-kit
 ```
 
 ---
@@ -46,7 +46,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 
 // Import Terra UI Styles
-import 'terra-ui-kit/dist/terra-ui-kit.css'
+import '@eraprimax/terra-ui-kit/dist/terra-ui-kit.css'
 
 createApp(App).mount('#app')
 ```
@@ -65,7 +65,7 @@ You can import components individually (recommended for optimal bundle size) ins
 
 ```vue
 <script setup lang="ts">
-import { GlassButton } from 'terra-ui-kit'
+import { GlassButton } from '@eraprimax/terra-ui-kit'
 import { Mail } from 'lucide-vue-next'
 </script>
 
@@ -86,7 +86,7 @@ import { Mail } from 'lucide-vue-next'
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { GlassTable } from 'terra-ui-kit'
+import { GlassTable } from '@eraprimax/terra-ui-kit'
 
 const columns = [
   { key: 'name', label: 'Company' },
@@ -115,7 +115,7 @@ const tableData = ref([
 
 ## 🗂️ Component Directory
 
-Here is the list of available premium glass components you can import from `terra-ui-kit`:
+Here is the list of available premium glass components you can import from `@eraprimax/terra-ui-kit`:
 
 | Category | Component Name | Description |
 | :--- | :--- | :--- |

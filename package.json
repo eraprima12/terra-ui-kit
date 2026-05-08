@@ -1,5 +1,5 @@
 {
-  "name": "terra-ui-kit",
+  "name": "@eraprimax/terra-ui-kit",
   "version": "1.0.0",
   "type": "module",
   "main": "./dist/terra-ui.umd.js",
