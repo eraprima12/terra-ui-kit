@@ -753,7 +753,6 @@ const cmdItems = ref<CommandItem[]>([
           </div>
         </div>
       </div>
-
       <!-- 2. DataTable Customizer View -->
       <div v-else-if="currentAppView === 'datatable'" class="flex flex-col gap-6">
         <div class="flex items-center justify-between">
