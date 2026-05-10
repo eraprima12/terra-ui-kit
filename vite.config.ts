@@ -5,7 +5,7 @@ import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig(({ command, mode }) => {
-  const isLib = process.env.BUILD_TARGET === 'lib'
+  const isLib = mode === 'lib'
 
   const baseConfig = {
     plugins: [

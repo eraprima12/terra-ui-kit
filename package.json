@@ -25,7 +25,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:lib": "BUILD_TARGET=lib vue-tsc -b && BUILD_TARGET=lib vite build",
+    "build:lib": "vite build --mode lib",
     "preview": "vite preview"
   },
   "dependencies": {
