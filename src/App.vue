@@ -44,7 +44,7 @@ import GlassBarChart from './components/Chart/GlassBarChart.vue'
 import GlassLineChart from './components/Chart/GlassLineChart.vue'
 import GlassDonutChart from './components/Chart/GlassDonutChart.vue'
 import GlassCommandPalette, { type CommandItem } from './components/Modal/GlassCommandPalette.vue'
-import { Settings, LogOut, User, Info, Search, FileText, Activity, FolderOpen, Mail, Lock } from 'lucide-vue-next'
+import { Settings, LogOut, User, Info, Search, FileText, Activity, FolderOpen, Mail, Lock, Code, X } from 'lucide-vue-next'
 
 const { add, promise } = useToast()
 
@@ -97,7 +97,7 @@ const progressValue = ref(65)
 const currentStep = ref(2)
 const currentCategory = ref('all')
 
-const currentAppView = ref('aio')
+const currentAppView = ref('landing')
 const globalSearchQuery = ref('')
 
 // Button Customizer State
@@ -358,22 +358,30 @@ const disclosureSnippet = computed(() => {
 </GlassAccordion>`
 })
 
-const chartsSnippet = computed(() => {
-  return `<!-- 1. Script Setup Declarations -->
-const barData = [
-  { label: 'Mon', value: 45 },
-  { label: 'Tue', value: 80 }
-];
-const donutData = [
-  { label: 'Desktop', value: 45, color: '#4182FF' }
-];
+const lineChartSnippet = computed(() => {
+  return `<!-- Glass Line Chart Component -->
+<GlassLineChart 
+  :data="barData" 
+  :height="180" 
+  color="#4182FF" 
+/>`
+})
 
-<!-- 2. Template Markup -->
-<GlassLineChart :data="barData" :height="180" color="#4182FF" />
+const barChartSnippet = computed(() => {
+  return `<!-- Glass Bar Chart Component -->
+<GlassBarChart 
+  :data="barData" 
+  :height="180" 
+/>`
+})
 
-<GlassBarChart :data="barData" :height="180" />
-
-<GlassDonutChart :data="donutData" :size="180" />`
+const donutChartSnippet = computed(() => {
+  return `<!-- Glass Donut Chart Component -->
+<GlassDonutChart 
+  :data="donutData" 
+  :size="180" 
+  :thickness="22" 
+/>`
 })
 
 const tableSnippet = computed(() => {
@@ -413,41 +421,203 @@ const cmdItems = ref<CommandItem[]>([
   { id: '6', title: 'Launch Table Builder', icon: FolderOpen, shortcut: 'T', category: 'Navigation & Builders', action: () => { currentAppView.value = 'datatable'; add({ title: 'Launched DataTable Customizer', type: 'success' }) } },
   { id: '7', title: 'Sign Out', icon: LogOut, shortcut: 'Q', category: 'Account & Settings', action: () => add({ title: 'Signed Out', type: 'error' }) },
 ])
+
+// Tab state logic for individual component showcases
+const showcaseTabs = ref<Record<string, 'preview' | 'code'>>({})
+const getShowcaseTab = (key: string) => showcaseTabs.value[key] || 'preview'
+const setShowcaseTab = (key: string, tab: 'preview' | 'code') => showcaseTabs.value[key] = tab
+
+// Global Code Drawer State
+const isCodeDrawerOpen = ref(false)
+const activeDrawerData = ref({ title: '', code: '' })
+const openCodeDrawer = (title: string, code: string) => {
+  activeDrawerData.value = { title, code }
+  isCodeDrawerOpen.value = true
+}
+const closeCodeDrawer = () => { isCodeDrawerOpen.value = false }
+
 </script>
 
 <template>
   <div class="relative min-h-screen overflow-hidden bg-[#050508] pb-20">
+    <!-- Global Top Navigation (Shadcn Style) -->
+    <nav class="sticky top-0 z-50 w-full border-b border-[#27272a] bg-[#050508]/80 backdrop-blur-md supports-[backdrop-filter]:bg-[#050508]/60">
+      <div class="container flex h-14 max-w-7xl mx-auto items-center px-4 md:px-8">
+        <div class="mr-6 flex cursor-pointer items-center gap-2 h-full py-2" @click="currentAppView = 'landing'">
+          <img src="/logo.svg" alt="Terra UI" class="h-8 w-auto brightness-0 invert" />
+        </div>
+        <div class="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <div class="w-full flex-1 md:w-auto md:flex-none">
+            <nav class="flex items-center gap-6 text-sm text-[#a1a1aa]">
+              <button @click="currentAppView = 'landing'" class="transition-colors hover:text-white cursor-pointer font-medium" :class="currentAppView === 'landing' ? 'text-white' : ''">Home</button>
+              <button @click="currentAppView = 'aio'" class="transition-colors hover:text-white cursor-pointer font-medium" :class="currentAppView === 'aio' ? 'text-white' : ''">Components</button>
+              <button @click="currentAppView = 'datatable'" class="transition-colors hover:text-white cursor-pointer font-medium" :class="currentAppView === 'datatable' ? 'text-white' : ''">Live Data</button>
+              <button @click="currentAppView = 'button'" class="transition-colors hover:text-white cursor-pointer font-medium" :class="currentAppView === 'button' ? 'text-white' : ''">Trigger Builder</button>
+            </nav>
+          </div>
+          <nav class="flex items-center gap-2">
+            <a href="#" class="inline-flex items-center justify-center rounded-md w-9 h-9 hover:bg-[#27272a] transition-colors text-white">
+              <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </nav>
+
     <!-- Ambient Background Orbs -->
-    <div class="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-primary/20 blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-indigo-500/10 blur-[150px] pointer-events-none mix-blend-screen"></div>
-    <div class="fixed top-[40%] left-[60%] w-[35vw] h-[35vw] rounded-full bg-emerald-500/10 blur-[100px] pointer-events-none mix-blend-screen animate-float"></div>
+    <template v-if="currentAppView !== 'landing'">
+      <div class="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-primary/20 blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow"></div>
+      <div class="fixed bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-indigo-500/10 blur-[150px] pointer-events-none mix-blend-screen"></div>
+      <div class="fixed top-[40%] left-[60%] w-[35vw] h-[35vw] rounded-full bg-emerald-500/10 blur-[100px] pointer-events-none mix-blend-screen animate-float"></div>
+    </template>
 
     <div class="relative z-10 p-4 md:p-8 flex flex-col gap-10 max-w-7xl mx-auto">
       <ToastProvider />
       <GlassCommandPalette :commands="cmdItems" />
 
+      <!-- 0. Shadcn Style Landing Selection View -->
+      <div v-if="currentAppView === 'landing'" class="flex flex-col items-center justify-center min-h-[80vh] text-center max-w-7xl mx-auto px-4 py-20 w-full">
+        <div class="inline-flex items-center rounded-full border border-[#27272a] bg-[#18181b] px-3 py-1 text-xs font-medium text-[#a1a1aa] mb-8 transition-colors hover:bg-[#27272a] cursor-pointer">
+          Ready for Enterprise Applications <span class="ml-1">→</span>
+        </div>
+        
+        <h1 class="text-4xl md:text-7xl font-bold tracking-tighter text-white mb-6 font-sans max-w-4xl">
+          Build elegant glassmorphic interfaces efficiently.
+        </h1>
+        
+        <p class="max-w-[750px] text-lg text-[#a1a1aa] sm:text-xl mb-10 font-light leading-relaxed tracking-wide">
+          A powerful visual component ecosystem. Clean aesthetics meet tactile glass-surface technology out of the box.
+        </p>
+
+        <div class="flex gap-4 mb-12">
+          <button @click="currentAppView = 'aio'" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-white text-black shadow hover:bg-white/90 h-11 px-8 cursor-pointer">
+            Explore Suite
+          </button>
+          <button @click="currentAppView = 'datatable'" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors border border-[#27272a] bg-transparent shadow-sm hover:bg-[#27272a] hover:text-white h-11 px-8 text-white cursor-pointer">
+            View Documentation
+          </button>
+        </div>
+
+        <!-- Advanced Component Mosaic Grid (Shadcn Copy Inspired) -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 w-full text-left mt-8 items-stretch">
+          
+          <!-- Column 1: Utility & Toggles (Span 4) -->
+          <div class="md:col-span-4 flex flex-col gap-6">
+            <!-- Mockup Widget: Auth / Toggle Panel -->
+            <div class="p-6 rounded-xl border border-[#27272a] bg-[#09090b] transition-all duration-300 hover:border-[#3f3f46] group h-fit flex flex-col">
+              <h4 class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><Lock class="w-3 h-3"/> Secure Access</h4>
+              <p class="text-xs text-[#71717a] mb-5">Enable multi-factor verification flows.</p>
+              <div class="space-y-5">
+                <div class="flex items-center justify-between bg-[#18181b]/40 border border-[#27272a] rounded-lg p-3">
+                   <div class="flex flex-col">
+                      <span class="text-xs text-white font-medium">Two-Factor Auth</span>
+                      <span class="text-[10px] text-[#71717a]">Highly recommended</span>
+                   </div>
+                   <GlassToggle v-model="formData.notifications" />
+                </div>
+                <div class="flex flex-col gap-2 px-1">
+                   <div class="flex justify-between text-[10px] text-[#71717a]"><span>Volume Balance</span><span>{{formData.volume}}%</span></div>
+                   <GlassSlider v-model="formData.volume" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Inputs Mock -->
+            <div class="p-6 rounded-xl border border-[#27272a] bg-[#09090b] transition-all duration-300 hover:border-[#3f3f46]">
+              <h4 class="text-xs font-bold text-[#71717a] uppercase tracking-widest mb-4">Network Setup</h4>
+              <div class="flex flex-col gap-3">
+                <GlassInput placeholder="IP Destination" size="sm" v-model="formData.search" />
+                <GlassButton variant="primary" size="sm" class="w-full">Init Protocol</GlassButton>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Center Dashboard Preview (Span 5) -->
+          <div class="md:col-span-5">
+            <div class="p-6 rounded-xl border border-[#27272a] bg-[#09090b] h-full flex flex-col transition-all duration-300 hover:border-[#3f3f46] hover:bg-[#09090b]/80 overflow-hidden">
+              <div class="flex items-center justify-between mb-8">
+                <div>
+                  <h4 class="text-lg font-bold text-white tracking-tight">Global Activity</h4>
+                  <p class="text-xs text-[#71717a]">Aggregate telemetry throughput.</p>
+                </div>
+                <GlassBadge variant="success" class="animate-pulse">Live</GlassBadge>
+              </div>
+              
+              <!-- Mini Chart -->
+              <div class="flex-1 flex items-end w-full mb-6 min-h-[160px]">
+                 <GlassBarChart :data="barData.slice(0, 6)" :height="160" class="w-full opacity-80 group-hover:opacity-100 transition-opacity" />
+              </div>
+
+              <!-- Activity Footer -->
+              <div class="flex items-center justify-between pt-5 border-t border-[#27272a]">
+                 <div class="flex -space-x-2">
+                    <GlassAvatar size="sm" initials="AD" class="border-2 border-[#09090b]" />
+                    <GlassAvatar size="sm" initials="BK" class="border-2 border-[#09090b]" />
+                    <div class="w-8 h-8 rounded-full bg-[#18181b] border border-[#27272a] flex items-center justify-center text-[10px] text-white">+3</div>
+                 </div>
+                 <GlassButton variant="glass" size="sm">Generate PDF</GlassButton>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3: Right Logs / Action (Span 3) -->
+          <div class="md:col-span-3 flex flex-col gap-6">
+             <!-- Activity Logs List -->
+             <div class="p-6 rounded-xl border border-[#27272a] bg-[#09090b] flex-1 flex flex-col transition-all duration-300 hover:border-[#3f3f46]">
+                <h4 class="text-sm font-semibold text-white mb-4">Recent Events</h4>
+                <div class="space-y-4 flex-1">
+                   <div v-for="(log, idx) in ['System breach scan', 'Deployment #802', 'Cache refreshed']" :key="idx" class="flex items-start gap-3">
+                      <div class="w-1.5 h-1.5 rounded-full bg-[#a1a1aa] mt-1.5"></div>
+                      <div class="flex flex-col">
+                         <span class="text-xs text-white font-medium">{{log}}</span>
+                         <span class="text-[10px] text-[#71717a]">{{idx + 1}}h ago</span>
+                      </div>
+                   </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-[#27272a]">
+                   <GlassProgressBar :progress="65" height="sm" color="primary" />
+                   <div class="text-[9px] text-[#71717a] mt-2 text-right">Sync Status</div>
+                </div>
+             </div>
+
+             <!-- Big Enter CTA -->
+             <div @click="currentAppView = 'aio'" class="p-6 rounded-xl border border-[#27272a] bg-white text-black cursor-pointer group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                <h3 class="text-base font-bold z-10 relative flex items-center gap-2">Browse All <FolderOpen class="w-4 h-4" /></h3>
+                <p class="text-xs opacity-70 z-10 relative mt-1">Access full source codes.</p>
+             </div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- 1. All-In-One (AIO) Landing Hub -->
       <div v-if="currentAppView === 'aio'" class="flex flex-col gap-10">
-        <header class="mb-4 text-center md:text-left mt-8">
-          <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/30 mb-3 tracking-tight">Terra Studio</h1>
+        <div class="flex items-center">
+          <button @click="currentAppView = 'landing'" class="text-xs text-white/40 hover:text-white flex items-center gap-1 transition-colors cursor-pointer">
+            ← Back to Selection
+          </button>
+        </div>
+        <header class="mb-4 text-center md:text-left">
+          <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/30 mb-3 tracking-tight">Terra-UI-Kit</h1>
           <p class="text-white/60 text-lg font-light tracking-wide mb-6">Interactive Glassmorphism Component Customizer & Suite</p>
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm text-white/70">
-            <Search class="w-4 h-4 text-white/40" />
-            Press <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-xs">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-xs">K</kbd> to open Command Palette
-          </div>
         </header>
 
-        <!-- Search Bar -->
-        <div class="max-w-2xl mx-auto w-full relative mb-4">
-          <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/30">
+        <!-- Enhanced Unified Search Bar -->
+        <div class="max-w-2xl mx-auto w-full relative mb-4 group">
+          <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
             <Search class="w-5 h-5" />
           </div>
           <input 
             v-model="globalSearchQuery"
             type="text"
             placeholder="Search components (e.g. datatable, button, datepicker, otp)..."
-            class="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/[0.03] border border-white/10 text-white placeholder-white/30 text-base outline-none transition-all focus:bg-white/[0.06] focus:border-primary/50 focus:ring-4 focus:ring-primary/20 shadow-2xl hover:border-white/20"
+            class="w-full pl-12 pr-24 py-4 rounded-2xl bg-white/[0.03] border border-white/10 text-white placeholder-white/30 text-base outline-none transition-all focus:bg-white/[0.06] focus:border-primary/50 focus:ring-4 focus:ring-primary/20 shadow-2xl hover:border-white/20"
           />
+          <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none gap-1">
+            <kbd class="px-1.5 py-0.5 rounded bg-white/10 border border-white/5 text-white/60 font-mono text-xs shadow-sm">Ctrl</kbd>
+            <span class="text-white/30 text-xs font-medium">+</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-white/10 border border-white/5 text-white/60 font-mono text-xs shadow-sm">K</kbd>
+          </div>
         </div>
 
         <!-- Search Results Filter Index -->
@@ -546,12 +716,14 @@ const cmdItems = ref<CommandItem[]>([
           <!-- Right Column: Main Content Area -->
           <div class="flex-1 w-full flex flex-col gap-10">
 
-        <!-- Quick Launch Core Builders Cards -->
-        <div v-if="currentCategory === 'all' && !globalSearchQuery" class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto w-full mb-6">
-          <!-- Table Customizer card -->
+        <!-- Master Symmetrical Layout Grid (Masonry-style for zero vertical gap waste) -->
+        <div class="columns-1 md:columns-2 xl:columns-3 gap-8 w-full block">
+          
+          <!-- Quick Launch Builders Cards -->
           <div 
+            v-if="currentCategory === 'all' && !globalSearchQuery"
             @click="currentAppView = 'datatable'"
-            class="group/card cursor-pointer relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.01] backdrop-blur-md p-8 flex flex-col justify-between h-64 transition-all duration-300 hover:border-primary/30 hover:bg-primary/[0.02] hover:-translate-y-1 shadow-2xl"
+            class="group/card cursor-pointer relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.01] backdrop-blur-md p-8 flex flex-col justify-between h-64 transition-all duration-300 hover:border-primary/30 hover:bg-primary/[0.02] hover:-translate-y-1 shadow-2xl mb-8 break-inside-avoid"
           >
             <div class="absolute -right-12 -top-12 w-32 h-32 rounded-full bg-primary/10 blur-3xl group-hover/card:bg-primary/20 transition-all"></div>
             <div>
@@ -568,10 +740,10 @@ const cmdItems = ref<CommandItem[]>([
             </span>
           </div>
 
-          <!-- Button Customizer card -->
           <div 
+            v-if="currentCategory === 'all' && !globalSearchQuery"
             @click="currentAppView = 'button'"
-            class="group/card cursor-pointer relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.01] backdrop-blur-md p-8 flex flex-col justify-between h-64 transition-all duration-300 hover:border-primary/30 hover:bg-primary/[0.02] hover:-translate-y-1 shadow-2xl"
+            class="group/card cursor-pointer relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.01] backdrop-blur-md p-8 flex flex-col justify-between h-64 transition-all duration-300 hover:border-primary/30 hover:bg-primary/[0.02] hover:-translate-y-1 shadow-2xl mb-8 break-inside-avoid"
           >
             <div class="absolute -right-12 -top-12 w-32 h-32 rounded-full bg-indigo-500/10 blur-3xl group-hover/card:bg-indigo-500/20 transition-all"></div>
             <div>
@@ -587,68 +759,88 @@ const cmdItems = ref<CommandItem[]>([
               Launch Builder →
             </span>
           </div>
-        </div>
 
-        <!-- The 3-Column Standard Showcases (Accessible directly) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-          <!-- Left Column -->
-          <div class="flex flex-col gap-8">
-            <GlassCard v-if="currentCategory === 'all' || currentCategory === 'forms'" title="Button System" subtitle="Interactive elements with multiple states">
-              <div class="flex justify-center p-6 border border-dashed border-white/10 rounded-xl mb-4 bg-white/[0.01]">
-                <GlassButton variant="primary">Standard Action</GlassButton>
-              </div>
-              <p class="text-xs text-white/40 leading-relaxed mb-4">Click "Launch Builder" above or search "button" to enter the advanced full-screen Button system playground.</p>
-              <GlassButton variant="glass" size="sm" class="w-full" @click="currentAppView = 'button'">Launch Button Builder</GlassButton>
-            </GlassCard>
-
-            <GlassCarousel v-if="currentCategory === 'all' || currentCategory === 'forms'" :slides="carouselSlides" />
-            <div v-if="currentCategory === 'all' || currentCategory === 'forms'" class="mb-4">
-              <GlassCodeSnippet :code="carouselSnippet" />
+          <!-- Button System Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'forms'" title="Button System" subtitle="Interactive elements with multiple states" class="mb-8 break-inside-avoid">
+            <div class="flex justify-center p-6 border border-dashed border-white/10 rounded-xl mb-4 bg-white/[0.01]">
+              <GlassButton variant="primary">Standard Action</GlassButton>
             </div>
+            <p class="text-xs text-white/40 leading-relaxed mb-4">Click "Launch Builder" above or search "button" to enter the advanced full-screen Button system playground.</p>
+            <GlassButton variant="glass" size="sm" class="w-full" @click="currentAppView = 'button'">Launch Button Builder</GlassButton>
+          </GlassCard>
 
-            <GlassCard v-if="currentCategory === 'all' || currentCategory === 'forms'" title="Form Inputs" subtitle="Text fields with icons and validation">
-              <div class="flex flex-col gap-4">
-                <GlassInput v-model="formData.search" placeholder="Search anything..."><template #icon><Search class="w-4 h-4" /></template></GlassInput>
-                <GlassInput v-model="formData.email" label="Email Address" placeholder="john@example.com" type="email"><template #icon><Mail class="w-4 h-4" /></template></GlassInput>
-                <GlassInput v-model="formData.password" label="Password" placeholder="••••••••" type="password"><template #icon><Lock class="w-4 h-4" /></template></GlassInput>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <GlassDatePicker v-model="formData.date" label="Scheduled Date" />
-                  <GlassTimePicker v-model="formData.time" label="Scheduled Time" />
-                </div>
-                <GlassDateRangePicker v-model="formData.range" label="Booking Range" />
-                <GlassTextarea v-model="formData.notes" label="Additional Notes" placeholder="Enter notes..." :rows="3" />
-                <GlassCheckbox v-model="formData.agree" label="I agree to terms" />
-                <div class="border-t border-white/5 pt-4"><GlassRadioGroup v-model="formData.billingPeriod" :options="billingOptions" label="Subscription Billing" /></div>
+          <!-- Carousel Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'forms'" title="Immersive Carousel" subtitle="Touch-enabled cinematic scroll wrapper" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Immersive Carousel', carouselSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <GlassCarousel :slides="carouselSlides" />
+          </GlassCard>
+
+          <!-- Form Inputs Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'forms'" title="Form Inputs" subtitle="Text fields with icons and validation" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Form Inputs', inputsStandardSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div class="flex flex-col gap-4">
+              <GlassInput v-model="formData.search" placeholder="Search anything..."><template #icon><Search class="w-4 h-4" /></template></GlassInput>
+              <GlassInput v-model="formData.email" label="Email Address" placeholder="john@example.com" type="email"><template #icon><Mail class="w-4 h-4" /></template></GlassInput>
+              <GlassInput v-model="formData.password" label="Password" placeholder="••••••••" type="password"><template #icon><Lock class="w-4 h-4" /></template></GlassInput>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <GlassDatePicker v-model="formData.date" label="Scheduled Date" />
+                <GlassTimePicker v-model="formData.time" label="Scheduled Time" />
               </div>
-              <GlassCodeSnippet :code="inputsStandardSnippet" />
-            </GlassCard>
+              <GlassDateRangePicker v-model="formData.range" label="Booking Range" />
+              <GlassTextarea v-model="formData.notes" label="Additional Notes" placeholder="Enter notes..." :rows="3" />
+              <GlassCheckbox v-model="formData.agree" label="I agree to terms" />
+              <div class="border-t border-white/5 pt-4"><GlassRadioGroup v-model="formData.billingPeriod" :options="billingOptions" label="Subscription Billing" /></div>
+            </div>
+          </GlassCard>
 
-            <GlassCard v-if="currentCategory === 'all' || currentCategory === 'forms'" title="Specialized Form Inputs" subtitle="Formatted, numeric, and currency fields">
-              <div class="flex flex-col gap-4">
-                <GlassNumberInput v-model="formData.quantity" label="Product Quantity" :min="1" :max="10" />
-                <GlassMaskedInput v-model="formData.npwp" label="Indonesian NPWP" mask="##.###.###.#-###.###" placeholder="00.000.000.0-000.000" />
-                <GlassCurrencyInput v-model="formData.price" label="Unit Price" prefix="Rp" />
-                <GlassCombobox v-model="formData.selectedPort" :options="comboboxOptions" label="Destination Port" />
-                <div class="border-t border-white/5 my-2"></div>
-                <GlassOTPInput v-model="formData.otp" :length="4" label="Security Pin" />
-                <GlassTagsInput v-model="formData.tags" label="Technologies" />
-              </div>
-              <GlassCodeSnippet :code="inputsSnippet" />
-            </GlassCard>
-          </div>
+          <!-- Specialized Form Inputs Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'forms'" title="Specialized Form Inputs" subtitle="Formatted, numeric, and currency fields" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Specialized Form Inputs', inputsSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div class="flex flex-col gap-4">
+              <GlassNumberInput v-model="formData.quantity" label="Product Quantity" :min="1" :max="10" />
+              <GlassMaskedInput v-model="formData.npwp" label="Indonesian NPWP" mask="##.###.###.#-###.###" placeholder="00.000.000.0-000.000" />
+              <GlassCurrencyInput v-model="formData.price" label="Unit Price" prefix="Rp" />
+              <GlassCombobox v-model="formData.selectedPort" :options="comboboxOptions" label="Destination Port" />
+              <div class="border-t border-white/5 my-2"></div>
+              <GlassOTPInput v-model="formData.otp" :length="4" label="Security Pin" />
+              <GlassTagsInput v-model="formData.tags" label="Technologies" />
+            </div>
+          </GlassCard>
 
-          <!-- Right Column -->
-          <div class="flex flex-col gap-8">
-            <GlassCard v-if="currentCategory === 'all' || currentCategory === 'nav'" title="Toast Notifications" subtitle="Dynamic, asynchronous feedback">
-              <div class="flex flex-col sm:flex-row gap-4 mt-2">
-                <GlassButton variant="glass" @click="showSuccessToast" class="flex-1">Success</GlassButton>
-                <GlassButton variant="danger" @click="showErrorToast" class="flex-1">Error</GlassButton>
-                <GlassButton variant="primary" @click="showPromiseToast" class="flex-1">Async Promise</GlassButton>
-              </div>
-              <GlassCodeSnippet :code="toastsSnippet" />
-            </GlassCard>
+          <!-- Toast Notifications Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'nav'" title="Toast Notifications" subtitle="Dynamic, asynchronous feedback" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Toast Notifications', toastsSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div class="flex flex-col sm:flex-row gap-4 mt-2">
+              <GlassButton variant="glass" @click="showSuccessToast" class="flex-1">Success</GlassButton>
+              <GlassButton variant="danger" @click="showErrorToast" class="flex-1">Error</GlassButton>
+              <GlassButton variant="primary" @click="showPromiseToast" class="flex-1">Async Promise</GlassButton>
+            </div>
+          </GlassCard>
 
-            <GlassCard v-if="currentCategory === 'all' || currentCategory === 'nav'" title="Modal & Overlays" subtitle="Focus-trapping popup dialogs">
+          <!-- Modal & Overlays Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'nav'" title="Modal & Overlays" subtitle="Focus-trapping popup dialogs" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Modal & Overlays', overlaysSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div>
               <p class="text-white/60 text-sm mb-6">Launch blurred modals that stack above ambient background or anchor popup action lists.</p>
               <div class="flex gap-4">
                 <GlassButton variant="primary" @click="isModalOpen = true" class="flex-1">Open Modal</GlassButton>
@@ -662,10 +854,17 @@ const cmdItems = ref<CommandItem[]>([
                   </template>
                 </GlassPopup>
               </div>
-              <GlassCodeSnippet :code="overlaysSnippet" />
-            </GlassCard>
+            </div>
+          </GlassCard>
 
-            <GlassCard v-if="currentCategory === 'all' || currentCategory === 'data'" title="Data Display" subtitle="Avatars and Loading States">
+          <!-- Data Display Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'data'" title="Data Display" subtitle="Avatars and Loading States" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Data Display', displaySnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div>
               <div>
                 <h4 class="text-sm text-white/50 mb-3">User Avatars</h4>
                 <div class="flex items-center gap-4">
@@ -696,55 +895,102 @@ const cmdItems = ref<CommandItem[]>([
                 <div class="flex items-center gap-6 mb-4"><GlassSpinner size="sm" color="primary" /><GlassSpinner size="md" color="success" /><GlassSpinner size="lg" color="danger" /></div>
                 <GlassProgressBar :progress="progressValue" color="primary" height="md" />
               </div>
-              <GlassCodeSnippet :code="displaySnippet" />
-            </GlassCard>
-          </div>
-        </div>
-
-        <!-- Navigation & Skeletons Section -->
-        <div v-if="currentCategory === 'all' || currentCategory === 'nav'" class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-          <GlassCard title="Navigation" subtitle="Breadcrumbs and Tabbed interfaces">
-            <div class="mb-6 border-b border-white/5 pb-6"><GlassBreadcrumb :items="[{ label: 'Dashboard', href: '#' }, { label: 'Settings' }]" /></div>
-            <div class="mb-6 border-b border-white/5 pb-6"><GlassStepper v-model="currentStep" :steps="['Account', 'Security', 'Finish']" /></div>
-            <GlassTabs v-model="activeTab" :tabs="[{ label: 'Account', value: 'account' }, { label: 'Security', value: 'security' }]"><div class="pt-6"><p class="text-sm text-white/70">Update account settings.</p></div></GlassTabs>
-            <GlassCodeSnippet :code="navigationSnippet" />
+            </div>
           </GlassCard>
 
-          <GlassCard title="Page Skeletons" subtitle="Header, Footer, and Collapsible Sidebar previews">
-            <div class="rounded-xl border border-white/10 overflow-hidden bg-white/[0.01] h-64 flex flex-col mb-4">
-              <div class="h-10 bg-white/5 border-b border-white/10 px-3 flex items-center justify-between text-[10px] font-bold text-white/80"><span>TERRA SHIELD</span></div>
-              <div class="flex-1 flex min-h-0">
-                <div class="w-12 bg-white/[0.02] border-r border-white/5 p-1.5 space-y-1"><div class="h-2 w-full rounded bg-white/10"></div><div class="h-2 w-full rounded bg-primary/20"></div></div>
-                <div class="flex-1 p-3"><div class="h-3 w-1/3 rounded bg-white/20 mb-2"></div><div class="h-12 rounded bg-white/5 border border-white/10"></div></div>
+          <!-- Navigation Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'nav'" title="Navigation" subtitle="Breadcrumbs and Tabbed interfaces" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Navigation Systems', navigationSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div>
+              <div class="mb-6 border-b border-white/5 pb-6"><GlassBreadcrumb :items="[{ label: 'Dashboard', href: '#' }, { label: 'Settings' }]" /></div>
+              <div class="mb-6 border-b border-white/5 pb-6"><GlassStepper v-model="currentStep" :steps="['Account', 'Security', 'Finish']" /></div>
+              <GlassTabs v-model="activeTab" :tabs="[{ label: 'Account', value: 'account' }, { label: 'Security', value: 'security' }]"><div class="pt-6"><p class="text-sm text-white/70">Update account settings.</p></div></GlassTabs>
+            </div>
+          </GlassCard>
+
+          <!-- Page Skeletons Card -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'nav'" title="Page Skeletons" subtitle="Header, Footer, and Collapsible Sidebar previews" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Page Skeletons', layoutSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div>
+              <div class="rounded-xl border border-white/10 overflow-hidden bg-white/[0.01] h-64 flex flex-col">
+                <div class="h-10 bg-white/5 border-b border-white/10 px-3 flex items-center justify-between text-[10px] font-bold text-white/80"><span>TERRA SHIELD</span></div>
+                <div class="flex-1 flex min-h-0">
+                  <div class="w-12 bg-white/[0.02] border-r border-white/5 p-1.5 space-y-1"><div class="h-2 w-full rounded bg-white/10"></div><div class="h-2 w-full rounded bg-primary/20"></div></div>
+                  <div class="flex-1 p-3"><div class="h-3 w-1/3 rounded bg-white/20 mb-2"></div><div class="h-12 rounded bg-white/5 border border-white/10"></div></div>
+                </div>
               </div>
             </div>
-            <GlassCodeSnippet :code="layoutSnippet" />
+          </GlassCard>
+
+          <!-- Revenue Flow Chart -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'data'" title="Revenue Flow" subtitle="GlassLineChart Component" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Revenue Line Chart', lineChartSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div class="pt-6"><GlassLineChart :data="barData" :height="180" color="#4182FF" /></div>
+          </GlassCard>
+
+          <!-- Weekly Activity Chart -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'data'" title="Weekly Activity" subtitle="GlassBarChart Component" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Activity Bar Chart', barChartSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div class="pt-6"><GlassBarChart :data="barData" :height="180" /></div>
+          </GlassCard>
+
+          <!-- Device Usage Chart -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'data'" title="Device Usage" subtitle="GlassDonutChart Component" class="mb-8 break-inside-avoid">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Device Donut Chart', donutChartSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div class="pt-6 flex justify-center"><GlassDonutChart :data="donutData" :size="180" :thickness="22" /></div>
           </GlassCard>
         </div>
 
-        <!-- Data Visualization Section -->
-        <div v-if="currentCategory === 'all' || currentCategory === 'data'" class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
-          <GlassCard title="Revenue Flow" subtitle="GlassLineChart Component" class="lg:col-span-1"><div class="pt-6"><GlassLineChart :data="barData" :height="180" color="#4182FF" /></div></GlassCard>
-          <GlassCard title="Weekly Activity" subtitle="GlassBarChart Component" class="lg:col-span-1"><div class="pt-6"><GlassBarChart :data="barData" :height="180" /></div></GlassCard>
-          <GlassCard title="Device Usage" subtitle="GlassDonutChart Component" class="lg:col-span-1"><div class="pt-6 flex justify-center"><GlassDonutChart :data="donutData" :size="180" :thickness="22" /></div></GlassCard>
-        </div>
-
-        <!-- Parallax Section -->
-        <div v-if="currentCategory === 'all' || currentCategory === 'data'" class="mt-8">
-          <GlassParallax image="https://picsum.photos/id/43/1200/600">
-            <div class="space-y-4 max-w-lg p-6 rounded-2xl border border-white/10 bg-black/45 backdrop-blur-md shadow-2xl">
-              <h3 class="text-3xl font-black text-white tracking-tight">Parallax Perspective</h3>
-              <p class="text-sm text-white/70 font-light leading-relaxed">Notice background shifts slower, creating incredible scroll depth.</p>
+        <!-- Wide Breakouts Section (Below Masonry Grid) -->
+        <div class="flex flex-col gap-8 w-full">
+          <!-- Parallax Section (Wide spanning) -->
+          <GlassCard v-if="currentCategory === 'all' || currentCategory === 'data'" title="Immersive Depth Engine" subtitle="Rich layered parallax motion effects" class="w-full">
+            <template #actions>
+              <GlassButton variant="ghost" size="icon" class="w-8 h-8 text-white/30 hover:text-primary hover:bg-primary/10 rounded-full transition-all" @click="openCodeDrawer('Immersive Depth Engine', parallaxSnippet)">
+                <Code class="w-4 h-4" />
+              </GlassButton>
+            </template>
+            <div class="rounded-xl overflow-hidden w-full">
+              <GlassParallax image="https://picsum.photos/id/43/1200/600">
+                <div class="space-y-4 max-w-lg p-6 rounded-2xl border border-white/10 bg-black/45 backdrop-blur-md shadow-2xl">
+                  <h3 class="text-3xl font-black text-white tracking-tight">Parallax Perspective</h3>
+                  <p class="text-sm text-white/70 font-light leading-relaxed">Notice background shifts slower, creating incredible scroll depth.</p>
+                </div>
+              </GlassParallax>
             </div>
-          </GlassParallax>
-          <div class="mt-4"><GlassCodeSnippet :code="parallaxSnippet" /></div>
+          </GlassCard>
         </div>
 
         <!-- Standard Table Showcase (AIO fallback view) -->
         <section v-if="currentCategory === 'all' || currentCategory === 'data'" class="flex flex-col gap-6 h-[450px] mt-4">
           <div class="flex justify-between items-center px-2">
             <h2 class="text-xl font-bold text-white flex items-center gap-3"><div class="w-2 h-8 bg-indigo-400 rounded-full"></div>Adaptive DataTable</h2>
-            <GlassButton variant="glass" size="sm" @click="currentAppView = 'datatable'">Open Full Customizer</GlassButton>
+            <div class="flex items-center gap-3">
+              <GlassButton variant="ghost" size="sm" class="text-white/60 hover:text-white" @click="openCodeDrawer('Adaptive DataTable', tableSnippet)">
+                <Code class="w-4 h-4 mr-2" /> View Code
+              </GlassButton>
+              <GlassButton variant="glass" size="sm" @click="currentAppView = 'datatable'">Open Full Customizer</GlassButton>
+            </div>
           </div>
           <div class="flex-1 min-h-0">
             <GlassTable :columns="columns" :data="tableData" />
@@ -819,8 +1065,13 @@ const cmdItems = ref<CommandItem[]>([
 
           <!-- Right Preview Panel -->
           <div class="lg:col-span-2 flex flex-col gap-6">
-            <GlassCard title="Live Preview" subtitle="Real-time rendering of customized data grid">
-              <div class="min-h-72 p-1 relative flex flex-col justify-between">
+            <GlassCard title="Live Interactive Environment" subtitle="Configure controls to live-render data grid state">
+              <div class="flex items-center gap-2 p-1 bg-white/5 border border-white/10 rounded-lg w-fit mb-6">
+                <button @click="setShowcaseTab('builderTable', 'preview')" class="text-xs px-3 py-1 rounded-md transition-all" :class="getShowcaseTab('builderTable') === 'preview' ? 'bg-white text-black font-medium shadow' : 'text-[#a1a1aa] hover:text-white cursor-pointer'">Live Environment</button>
+                <button @click="setShowcaseTab('builderTable', 'code')" class="text-xs px-3 py-1 rounded-md transition-all" :class="getShowcaseTab('builderTable') === 'code' ? 'bg-white text-black font-medium shadow' : 'text-[#a1a1aa] hover:text-white cursor-pointer'">View Template</button>
+              </div>
+
+              <div v-if="getShowcaseTab('builderTable') === 'preview'" class="min-h-72 p-1 relative flex flex-col justify-between">
                 <GlassTable 
                   v-if="tableData.length > 0"
                   :columns="activeColumns" 
@@ -837,10 +1088,9 @@ const cmdItems = ref<CommandItem[]>([
                   <GlassButton variant="primary" size="sm" @click="repopulateTable">Repopulate Database</GlassButton>
                 </GlassEmptyState>
               </div>
-            </GlassCard>
-
-            <GlassCard title="Copy Operational Code" subtitle="Instant copy-paste Vue template snippet">
-              <GlassCodeSnippet :code="tableSnippet" />
+              <div v-else>
+                <GlassCodeSnippet :code="tableSnippet" />
+              </div>
             </GlassCard>
           </div>
         </div>
@@ -925,7 +1175,12 @@ const cmdItems = ref<CommandItem[]>([
           <!-- Right Preview Panel -->
           <div class="lg:col-span-2 flex flex-col gap-6">
             <GlassCard title="Live Interactive Sandbox" subtitle="Tactile click trigger with bounce feedback">
-              <div class="h-64 border border-dashed border-white/10 rounded-2xl flex items-center justify-center bg-white/[0.01]">
+              <div class="flex items-center gap-2 p-1 bg-white/5 border border-white/10 rounded-lg w-fit mb-6">
+                <button @click="setShowcaseTab('builderBtn', 'preview')" class="text-xs px-3 py-1 rounded-md transition-all" :class="getShowcaseTab('builderBtn') === 'preview' ? 'bg-white text-black font-medium shadow' : 'text-[#a1a1aa] hover:text-white cursor-pointer'">Live Sandbox</button>
+                <button @click="setShowcaseTab('builderBtn', 'code')" class="text-xs px-3 py-1 rounded-md transition-all" :class="getShowcaseTab('builderBtn') === 'code' ? 'bg-white text-black font-medium shadow' : 'text-[#a1a1aa] hover:text-white cursor-pointer'">Copy Snippet</button>
+              </div>
+
+              <div v-if="getShowcaseTab('builderBtn') === 'preview'" class="h-64 border border-dashed border-white/10 rounded-2xl flex items-center justify-center bg-white/[0.01]">
                 <GlassButton 
                   :variant="playButton.variant as any" 
                   :size="playButton.size as any" 
@@ -936,10 +1191,9 @@ const cmdItems = ref<CommandItem[]>([
                   <template #suffix v-if="btnSuffix"><component :is="btnSuffix === 'Search' ? Search : btnSuffix === 'Mail' ? Mail : btnSuffix === 'Lock' ? Lock : Settings" class="w-4 h-4" /></template>
                 </GlassButton>
               </div>
-            </GlassCard>
-
-            <GlassCard title="Grab Customizer Template" subtitle="Instant copy-paste Vue codeblock">
-              <GlassCodeSnippet :code="buttonSnippet" />
+              <div v-else>
+                <GlassCodeSnippet :code="buttonSnippet" />
+              </div>
             </GlassCard>
           </div>
         </div>
@@ -971,6 +1225,48 @@ const cmdItems = ref<CommandItem[]>([
         <GlassButton variant="primary" @click="isModalOpen = false">Save Changes</GlassButton>
       </template>
     </GlassModal>
+
+    <!-- Modern Sliding Code Drawer Overlay -->
+    <Transition 
+      enter-active-class="transition duration-300 ease-out" 
+      enter-from-class="translate-x-full opacity-0" 
+      enter-to-class="translate-x-0 opacity-100" 
+      leave-active-class="transition duration-200 ease-in" 
+      leave-from-class="translate-x-0 opacity-100" 
+      leave-to-class="translate-x-full opacity-0"
+    >
+      <div v-if="isCodeDrawerOpen" class="fixed inset-y-0 right-0 z-[100] w-full max-w-xl glass-surface border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl flex flex-col h-full">
+        <!-- Drawer Header -->
+        <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-black/20">
+          <div class="flex flex-col">
+            <div class="flex items-center gap-2 text-xs text-primary font-bold uppercase tracking-wider mb-1">
+              <Code class="w-3 h-3" /> Component Source
+            </div>
+            <h3 class="text-xl font-bold text-white">{{ activeDrawerData.title }}</h3>
+          </div>
+          <GlassButton variant="ghost" size="icon" class="rounded-full hover:bg-white/10" @click="closeCodeDrawer">
+            <X class="w-5 h-5" />
+          </GlassButton>
+        </div>
+
+        <!-- Drawer Body (Scrollable Code Space) -->
+        <div class="flex-1 overflow-y-auto p-6 bg-[#0c0c0e]/80">
+          <GlassCodeSnippet :code="activeDrawerData.code" />
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Backdrop to close drawer -->
+    <Transition 
+      enter-active-class="transition duration-300 ease-out" 
+      enter-from-class="opacity-0" 
+      enter-to-class="opacity-100" 
+      leave-active-class="transition duration-200 ease-in" 
+      leave-from-class="opacity-100" 
+      leave-to-class="opacity-0"
+    >
+      <div v-if="isCodeDrawerOpen" @click="closeCodeDrawer" class="fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm"></div>
+    </Transition>
 
   </div>
 </template>

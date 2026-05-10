@@ -23,11 +23,18 @@ const props = withDefaults(defineProps<Props>(), {
     <!-- Optional Glossy Shine Effect -->
     <div class="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-transparent opacity-0 pointer-events-none transition-opacity duration-500 group-hover:opacity-100"></div>
 
-    <div v-if="title || subtitle || $slots.header" class="mb-4">
+    <div v-if="title || subtitle || $slots.header" class="mb-4 relative flex justify-between items-start">
       <slot name="header">
-        <h3 v-if="title" class="text-lg font-bold text-white tracking-tight">{{ title }}</h3>
-        <p v-if="subtitle" class="text-sm text-white/60 mt-1">{{ subtitle }}</p>
+        <div class="flex-1 min-w-0 pr-4">
+          <h3 v-if="title" class="text-lg font-bold text-white tracking-tight truncate">{{ title }}</h3>
+          <p v-if="subtitle" class="text-sm text-white/60 mt-1 line-clamp-1">{{ subtitle }}</p>
+        </div>
       </slot>
+      
+      <!-- Top Right Actions Slot -->
+      <div v-if="$slots.actions" class="flex-shrink-0 flex items-center gap-2 relative z-20">
+        <slot name="actions"></slot>
+      </div>
     </div>
 
     <div class="relative z-10">

@@ -4,27 +4,45 @@ import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-    tailwindcss(),
-  ],
-  build: {
-    lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      name: 'TerraUI',
-      fileName: (format) => `terra-ui.${format}.js`
-    },
-    rollupOptions: {
-      // Make sure to externalize deps that shouldn't be bundled into your library
-      external: ['vue', 'lucide-vue-next'],
-      output: {
-        // Provide global variables to use in the UMD build for externalized deps
-        globals: {
-          vue: 'Vue',
-          'lucide-vue-next': 'LucideVueNext'
+export default defineConfig(({ command, mode }) => {
+  const isLib = process.env.BUILD_TARGET === 'lib'
+
+  const baseConfig = {
+    plugins: [
+      vue(),
+      tailwindcss(),
+    ],
+  }
+
+  if (isLib) {
+    return {
+      ...baseConfig,
+      build: {
+        outDir: 'dist',
+        lib: {
+          entry: resolve(__dirname, 'src/index.ts'),
+          name: 'TerraUI',
+          fileName: (format) => `terra-ui.${format}.js`
+        },
+        rollupOptions: {
+          external: ['vue', 'lucide-vue-next'],
+          output: {
+            globals: {
+              vue: 'Vue',
+              'lucide-vue-next': 'LucideVueNext'
+            }
+          }
         }
       }
+    }
+  }
+
+  // Default config for static web app build (Vercel compatible)
+  return {
+    ...baseConfig,
+    build: {
+      outDir: 'dist',
+      // Standard app build generates index.html and assets
     }
   }
 })
