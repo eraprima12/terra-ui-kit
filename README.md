@@ -2,7 +2,9 @@
 
 [![NPM Version](https://img.shields.io/npm/v/@eraprimax/terra-ui-kit?color=4182FF&style=flat-square)](https://www.npmjs.com/package/@eraprimax/terra-ui-kit)
 [![License](https://img.shields.io/npm/l/@eraprimax/terra-ui-kit?color=34D399&style=flat-square)](https://github.com/eraprima12/terra-ui-kit)
-[![Bundle Size](https://img.shields.io/bundlephobia/minzip/@eraprimax/terra-ui-kit?color=FBBF24&style=flat-square)](https://bundlephobia.com/package/@eraprimax/terra-ui-kit)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=flat-square&logo=vercel)](https://terra-ui-kit-ten.vercel.app/)
+
+✨ **[Visit Live Interactive Documentation & Component Suite →](https://terra-ui-kit-ten.vercel.app/)**
 
 An ultra-modern, glassmorphic UI component suite built for **Vue 3** and **Tailwind CSS**. Designed for developers looking to craft stunning, cyberpunk-inspired, and futuristic web applications with tactile depth, vibrant color orbs, and rich glassmorphism physics.
 

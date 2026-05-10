@@ -1,7 +1,15 @@
 {
   "name": "@eraprimax/terra-ui-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
+  "homepage": "https://terra-ui-kit-ten.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eraprima12/terra-ui-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eraprima12/terra-ui-kit/issues"
+  },
   "main": "./dist/terra-ui.umd.js",
   "module": "./dist/terra-ui.es.js",
   "exports": {
